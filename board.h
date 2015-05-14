@@ -27,7 +27,7 @@ public:
 
     Piece GetPieceAtIndex(char boardIndex);
 
-    std::array<Piece, 16> &GetPieces() { return m_White; }
+    std::array<Piece, 16> &GetPieces(Piece::Colour colour) { return colour == Piece::White ? m_White : m_Black; }
 
     void SetPieceAtIndex(Piece &piece, signed char index);
 

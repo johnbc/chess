@@ -24,7 +24,15 @@ int main() {
     std::cout << "Hello chess!" << std::endl;
 
     Chess chess;
-    chess.GenerateMoves();
+
+    for (int i = 0; i < 20; i++) {
+        chess.GenerateMove(Piece::White);
+        chess.DumpBoard();
+        chess.GenerateMove(Piece::Black);
+        chess.DumpBoard();
+
+
+    }
 
     return 0;
 }

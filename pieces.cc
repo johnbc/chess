@@ -106,3 +106,39 @@ char Piece::GetText() {
 
     return p;
 }
+
+int Piece::GetScore() {
+    if (m_BoardIndex == 127) {
+        return 0;
+    }
+
+    int score = 0;
+    switch (m_Type) {
+        case None:
+            break;
+        case Pawn:
+            score = 1;
+            break;
+        case Rook:
+            score = 5;
+            break;
+        case Knight:
+            score = 4;
+            break;
+        case Bishop:
+            score = 3;
+            break;
+        case King:
+            score = 10000;
+            break;
+        case Queen:
+            score = 8;
+            break;
+    }
+
+    if (m_Colour == Black) {
+        score *= -1;
+    }
+
+    return score;
+}

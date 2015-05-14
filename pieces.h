@@ -51,6 +51,8 @@ public:
 
     char GetText();
 
+    int GetScore();
+
 private:
     signed char m_BoardIndex;
     Colour m_Colour;

@@ -9,31 +9,51 @@ ChessLogic::ChessLogic() {
 
 }
 
+ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, Board &board) {
+    Move bestMove;
+    std::vector<ChessLogic::Move> moves;
+    for (Piece &p : board.GetPieces(colour)) {
+        GenerateMoves(p, board, moves);
+    }
+    int sign = colour == Piece::White ? 1 : -1;
+    bestMove.m_Score = -10000;
+    for (ChessLogic::Move &m : moves) {
+        m.m_Board = board;
+        ApplyMove(m, m.m_Board);
+        m.m_Score = ScoreBoard(m.m_Board) * sign;
+        if (m.m_Score > bestMove.m_Score) {
+            bestMove = m;
+        }
+    }
+
+    return bestMove;
+}
+
 
 void ChessLogic::GenerateMoves(Piece &piece, Board &board, std::vector<Move> &out_moves) {
     switch (piece.GetType()) {
-        case Piece::Pawn: {
-            // GenerateMovesPawn(piece, board, out_moves);
+        case Piece::Pawn:
+            GenerateMovesPawn(piece, board, out_moves);
             break;
-        }
         case Piece::Rook:
-            //         GenerateMoveRook(piece, board, out_moves);
+            GenerateMoveRook(piece, board, out_moves);
             break;
         case Piece::Bishop:
-            //          GenerateMoveBishop(piece, board, out_moves);
-        default:
-            break;
-        case Piece::None:
+            GenerateMoveBishop(piece, board, out_moves);
             break;
         case Piece::Knight:
-            //GenerateMoveKnight(piece, board, out_moves);
+            GenerateMoveKnight(piece, board, out_moves);
             break;
         case Piece::King:
             GenerateMoveKing(piece, board, out_moves);
             break;
         case Piece::Queen:
-            // GenerateMoveBishop(piece, board, out_moves);
-            // GenerateMoveRook(piece, board, out_moves);
+            GenerateMoveBishop(piece, board, out_moves);
+            GenerateMoveRook(piece, board, out_moves);
+            break;
+        case Piece::None:
+            break;
+        default:
             break;
 
     }
@@ -47,11 +67,15 @@ void ChessLogic::ApplyMove(ChessLogic::Move &move, Board &board) {
 
 void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
     // pawn move logic
-    if (piece.GetType() != Piece::Pawn) {
+
+    signed char sign = piece.GetColour() == Piece::White ? 1 : -1;
+    Move move;
+    signed char destBoardIndex = piece.GetBoardIndex() + 8 * sign;
+
+    if (destBoardIndex < 0 || destBoardIndex > 63) {
         return;
     }
-    Move move;
-    signed char destBoardIndex = piece.GetBoardIndex() + 8;
+
     Piece destPiece = board.GetPieceAtIndex(destBoardIndex);
     if (destPiece.GetType() == Piece::None) {
 
@@ -61,7 +85,7 @@ void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<Chess
 
         out_moves.push_back(move);
         if (piece.GetRank() == 2) {
-            destBoardIndex += 8;
+            destBoardIndex += 8 * sign;
             destPiece = board.GetPieceAtIndex(destBoardIndex);
             if (destPiece.GetType() == Piece::None) {
                 move.m_To = destBoardIndex;
@@ -71,14 +95,15 @@ void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<Chess
     }
 
     // captures
-    destBoardIndex = move.m_From + 7;
+    destBoardIndex = move.m_From + 7 * sign;
+
     destPiece = board.GetPieceAtIndex(destBoardIndex);
     if (destPiece.GetType() != Piece::None && destPiece.GetColour() != piece.GetColour()) {
         move.m_To = destBoardIndex;
         out_moves.push_back(move);
     }
 
-    destBoardIndex = move.m_From + 9;
+    destBoardIndex = move.m_From + 9 * sign;
     destPiece = board.GetPieceAtIndex(destBoardIndex);
     if (destPiece.GetType() != Piece::None && destPiece.GetColour() != piece.GetColour()) {
         move.m_To = destBoardIndex;
@@ -89,8 +114,6 @@ void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<Chess
 void ChessLogic::GenerateMoveRook(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
 
     // rook move logic
-
-
     signed char rank = piece.GetRank();
     signed char rank_range_index_max = rank * 8 - 1;
     signed char rank_range_index_min = (rank - 1) * 8;
@@ -183,7 +206,6 @@ void ChessLogic::GenerateMoveBishop(Piece &piece, Board &board, std::vector<Ches
             }
 
             destBoardIndex += m;
-
 
         }
     }
@@ -319,4 +341,16 @@ void ChessLogic::GenerateMoveKing(Piece &piece, Board &board, std::vector<ChessL
 
     }
 
+}
+
+int ChessLogic::ScoreBoard(Board &board) {
+    int score = 0;
+    for (Piece &p : board.GetPieces(Piece::White)) {
+        score += p.GetScore();
+    }
+
+    for (Piece &p : board.GetPieces(Piece::Black)) {
+        score += p.GetScore();
+    }
+    return score;
 }

@@ -15,8 +15,7 @@ Board::Board() {
 
 void Board::Reset() {
     Clear();
-    SetInitialByFEN("rnbq/1/bnr/pppppppp/8/7/k/8/7/K/PPPPPPPP/RNB/1/QBNR");
-    Print();
+    SetInitialByFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR");
 }
 
 void Board::Clear() {
@@ -111,7 +110,19 @@ void Board::SetPieceAtIndex(Piece &piece, signed char index) {
                 p.SetBoardIndex(127);
             }
         }
+    }
 
+    if (piece.GetColour() == Piece::Black) {
+        for (Piece &p :m_Black) {
+            if (p.GetBoardIndex() == piece.GetBoardIndex()) {
+                p.SetBoardIndex(index);
+            }
+        }
 
+        for (Piece &p :m_White) {
+            if (p.GetBoardIndex() == index) {
+                p.SetBoardIndex(127);
+            }
+        }
     }
 }

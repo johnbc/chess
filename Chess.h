@@ -23,7 +23,10 @@ public:
 
     ~Chess();
 
-    void GenerateMoves();
+    void GenerateMove(Piece::Colour colour);
+
+    void DumpBoard();
+
 };
 
 
