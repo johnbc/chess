@@ -25,7 +25,7 @@ int main() {
 
     Chess chess;
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 50; i++) {
         chess.GenerateMove(Piece::White);
         chess.DumpBoard();
         chess.GenerateMove(Piece::Black);

@@ -37,6 +37,11 @@ public:
     int ScoreBoard(Board &Board);
 
     Move GetBestMove(Piece::Colour colour, Board &board);
+
+    void GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<Move> &out_moves);
+
+    int GetMoveWithMiniMax(Piece::Colour, Move move, int depth, bool maxing, Move &out_move);
+
 };
 
 
