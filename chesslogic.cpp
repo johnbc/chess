@@ -2,6 +2,7 @@
 // Created by jbc on 13/05/15.
 //
 
+#include <assert.h>
 #include "chesslogic.h"
 
 
@@ -13,18 +14,29 @@ ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, Board &board) {
     Move bestMove;
     std::vector<ChessLogic::Move> moves;
     for (Piece &p : board.GetPieces(colour)) {
+        assert(p.GetColour() == colour);
+        assert(p.GetType() != Piece::None);
+
         GenerateMoves(p, board, moves);
     }
+
+    assert(moves.size() > 0);
+    int i = 0;
     int sign = colour == Piece::White ? 1 : -1;
     bestMove.m_Score = -10000;
     for (ChessLogic::Move &m : moves) {
+        assert(m.m_Piece.GetColour() == colour && m.m_Piece.GetType() != Piece::None);
         m.m_Board = board;
         ApplyMove(m, m.m_Board);
         m.m_Score = ScoreBoard(m.m_Board) * sign;
         if (m.m_Score > bestMove.m_Score) {
             bestMove = m;
+            i++;
         }
     }
+
+    assert(i > 0);
+    assert(bestMove.m_Piece.GetColour() == colour);
 
     return bestMove;
 }
@@ -69,18 +81,19 @@ void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<Chess
     // pawn move logic
 
     signed char sign = piece.GetColour() == Piece::White ? 1 : -1;
-    Move move;
+
     signed char destBoardIndex = piece.GetBoardIndex() + 8 * sign;
 
     if (destBoardIndex < 0 || destBoardIndex > 63) {
         return;
     }
+    Move move;
+    move.m_From = piece.GetBoardIndex();
+    move.m_Piece = piece;
 
     Piece destPiece = board.GetPieceAtIndex(destBoardIndex);
     if (destPiece.GetType() == Piece::None) {
 
-        move.m_From = piece.GetBoardIndex();
-        move.m_Piece = piece;
         move.m_To = destBoardIndex;
 
         out_moves.push_back(move);

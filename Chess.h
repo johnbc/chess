@@ -16,6 +16,7 @@ private:
     Piece::Colour m_TurnToPlay;
     int m_Ply;
     int m_Turn;
+    ChessLogic::Move m_LastMove;
 
     ChessLogic *m_ChessLogic;
 public:
