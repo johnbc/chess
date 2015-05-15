@@ -12,39 +12,69 @@ ChessLogic::ChessLogic() {
 
 ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, Board &board) {
     Move bestMove;
-/*
-    std::vector<ChessLogic::Move> moves;
+    Move move;
+    move.m_Board = board;
+    ChessLogic::MinMaxBest best = GetMoveWithMiniMax(colour, move, 5, true);
+
+    return best.m_Move;
+}
+
+ChessLogic::MinMaxBest ChessLogic::GetMoveWithMiniMax(Piece::Colour colour, ChessLogic::Move move, int depth,
+                                                      bool maxing) {
+    if (depth == 0 || false) {
+
+        MinMaxBest val;
+        val.m_Score = move.m_Score;
+        val.m_Move = move;
+        return val;
+    }
+    MinMaxBest best;
+    if (maxing) {
+        best.m_Score = -100000;
+        std::vector<ChessLogic::Move> moves;
+        GenerateMovesForBoard(colour, move.m_Board, moves);
+        MinMaxBest test;
+        for (Move &m : moves) {
+            test = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, false);
+            if (test.m_Score > best.m_Score) {
+                best = test;
+                best.m_Move = m;
+            }
+
+        }
+    }
+    else {
+        best.m_Score = 100000;;
+        std::vector<ChessLogic::Move> moves;
+        GenerateMovesForBoard(colour, move.m_Board, moves);
+        MinMaxBest test;
+        for (Move &m : moves) {
+            test = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, true);
+            if (test.m_Score < best.m_Score) {
+                best = test;
+                best.m_Move = m;
+            }
+        }
+    }
+    return best;
+}
+
+void ChessLogic::GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+
     for (Piece &p : board.GetPieces(colour)) {
         assert(p.GetColour() == colour);
         assert(p.GetType() != Piece::None);
 
-        GenerateMoves(p, board, moves);
+        GenerateMoves(p, board, out_moves);
     }
 
-    assert(moves.size() > 0);
-    int i = 0;
     int sign = colour == Piece::White ? 1 : -1;
-    bestMove.m_Score = -10000;
-    for (ChessLogic::Move &m : moves) {
+    for (ChessLogic::Move &m : out_moves) {
         assert(m.m_Piece.GetColour() == colour && m.m_Piece.GetType() != Piece::None);
         m.m_Board = board;
         ApplyMove(m, m.m_Board);
         m.m_Score = ScoreBoard(m.m_Board) * sign;
-        if (m.m_Score > bestMove.m_Score) {
-            bestMove = m;
-            i++;
-        }
     }
-
-    assert(i > 0);
-    assert(bestMove.m_Piece.GetColour() == colour);
-
-*/
-    Move move;
-    move.m_Board = board;
-    GetMoveWithMiniMax(colour, move, 5, true, bestMove);
-
-    return bestMove;
 }
 
 
@@ -366,7 +396,11 @@ int ChessLogic::ScoreBoard(Board &board) {
     int score = 0;
     for (Piece &p : board.GetPieces(Piece::White)) {
         score += p.GetScore();
+        if ((p.GetRank() == 4 || p.GetRank() == 5) && (p.GetFile() > 'B' && p.GetFile() < 'G')) {
+            score += 4;
+        }
     }
+
 
     for (Piece &p : board.GetPieces(Piece::Black)) {
         score += p.GetScore();
@@ -374,56 +408,3 @@ int ChessLogic::ScoreBoard(Board &board) {
     return score;
 }
 
-int ChessLogic::GetMoveWithMiniMax(Piece::Colour colour, ChessLogic::Move move, int depth, bool maxing,
-                                   Move &out_move) {
-    if (depth == 0 || false) {
-        return move.m_Score;
-    }
-    int bestValue = 0;
-    if (maxing) {
-        bestValue = -100000;
-        std::vector<ChessLogic::Move> moves;
-        GenerateMovesForBoard(colour, move.m_Board, moves);
-        for (Move &m : moves) {
-            int val = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, false,
-                                         out_move);
-            if (val > bestValue) {
-                out_move = m;
-            }
-            bestValue = std::max(bestValue, val);
-        }
-    }
-    else {
-        bestValue = 1100000;
-        std::vector<ChessLogic::Move> moves;
-        GenerateMovesForBoard(colour, move.m_Board, moves);
-        for (Move &m : moves) {
-            int val = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, true,
-                                         out_move);
-            if (val < bestValue) {
-                out_move = m;
-            }
-
-            bestValue = std::min(bestValue, val);
-        }
-    }
-    return bestValue;
-}
-
-void ChessLogic::GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<ChessLogic::Move> &out_moves) {
-
-    for (Piece &p : board.GetPieces(colour)) {
-        assert(p.GetColour() == colour);
-        assert(p.GetType() != Piece::None);
-
-        GenerateMoves(p, board, out_moves);
-    }
-
-    int sign = colour == Piece::White ? 1 : -1;
-    for (ChessLogic::Move &m : out_moves) {
-        assert(m.m_Piece.GetColour() == colour && m.m_Piece.GetType() != Piece::None);
-        m.m_Board = board;
-        ApplyMove(m, m.m_Board);
-        m.m_Score = ScoreBoard(m.m_Board) * sign;
-    }
-}

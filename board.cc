@@ -15,7 +15,8 @@ Board::Board() {
 
 void Board::Reset() {
     Clear();
-    SetInitialByFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR");
+    //  SetInitialByFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR");
+    SetInitialByFEN("5/r/2/q/7/8/8/4/n/B/2/p/1/k/1/N/3/P/7/3/K/4");
 }
 
 void Board::Clear() {

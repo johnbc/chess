@@ -40,7 +40,12 @@ public:
 
     void GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<Move> &out_moves);
 
-    int GetMoveWithMiniMax(Piece::Colour, Move move, int depth, bool maxing, Move &out_move);
+    struct MinMaxBest {
+        int m_Score;
+        Move m_Move;
+    };
+
+    MinMaxBest GetMoveWithMiniMax(Piece::Colour, Move move, int depth, bool maxing);
 
 };
 
