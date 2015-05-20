@@ -4,81 +4,40 @@
 
 #include <assert.h>
 #include "chesslogic.h"
+#include "movelogic.h"
 
 
 ChessLogic::ChessLogic() {
 
 }
 
-ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, Board &board) {
-    Move bestMove;
-    Move move;
-    move.m_Board = board;
-    ChessLogic::MinMaxBest best = GetMoveWithMiniMax(colour, move, 5, true);
+ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, const Board &board, Evaluation *eval) {
 
-    return best.m_Move;
+    NegaMaxLogic moveLogic(colour, board, eval, this);
+
+    return moveLogic.GetAMove(2);
 }
 
-ChessLogic::MinMaxBest ChessLogic::GetMoveWithMiniMax(Piece::Colour colour, ChessLogic::Move move, int depth,
-                                                      bool maxing) {
-    if (depth == 0 || false) {
+void ChessLogic::GenerateMovesForBoard(Piece::Colour colour, const Board &board,
+                                       std::vector<ChessLogic::Move> &out_moves) {
 
-        MinMaxBest val;
-        val.m_Score = move.m_Score;
-        val.m_Move = move;
-        return val;
-    }
-    MinMaxBest best;
-    if (maxing) {
-        best.m_Score = -100000;
-        std::vector<ChessLogic::Move> moves;
-        GenerateMovesForBoard(colour, move.m_Board, moves);
-        MinMaxBest test;
-        for (Move &m : moves) {
-            test = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, false);
-            if (test.m_Score > best.m_Score) {
-                best = test;
-                best.m_Move = m;
-            }
-
-        }
-    }
-    else {
-        best.m_Score = 100000;;
-        std::vector<ChessLogic::Move> moves;
-        GenerateMovesForBoard(colour, move.m_Board, moves);
-        MinMaxBest test;
-        for (Move &m : moves) {
-            test = GetMoveWithMiniMax((colour == Piece::White) ? Piece::Black : Piece::White, m, depth - 1, true);
-            if (test.m_Score < best.m_Score) {
-                best = test;
-                best.m_Move = m;
-            }
-        }
-    }
-    return best;
-}
-
-void ChessLogic::GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<ChessLogic::Move> &out_moves) {
-
-    for (Piece &p : board.GetPieces(colour)) {
+    for (const Piece &p : board.GetPieces(colour)) {
         assert(p.GetColour() == colour);
         assert(p.GetType() != Piece::None);
 
         GenerateMoves(p, board, out_moves);
     }
 
-    int sign = colour == Piece::White ? 1 : -1;
     for (ChessLogic::Move &m : out_moves) {
         assert(m.m_Piece.GetColour() == colour && m.m_Piece.GetType() != Piece::None);
         m.m_Board = board;
         ApplyMove(m, m.m_Board);
-        m.m_Score = ScoreBoard(m.m_Board) * sign;
+
     }
 }
 
 
-void ChessLogic::GenerateMoves(Piece &piece, Board &board, std::vector<Move> &out_moves) {
+void ChessLogic::GenerateMoves(const Piece &piece, const Board &board, std::vector<Move> &out_moves) {
     switch (piece.GetType()) {
         case Piece::Pawn:
             GenerateMovesPawn(piece, board, out_moves);
@@ -113,12 +72,12 @@ void ChessLogic::ApplyMove(ChessLogic::Move &move, Board &board) {
 }
 
 
-void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+void ChessLogic::GenerateMovesPawn(const Piece &piece, const Board &board, std::vector<ChessLogic::Move> &out_moves) {
     // pawn move logic
 
     signed char sign = piece.GetColour() == Piece::White ? 1 : -1;
 
-    signed char destBoardIndex = piece.GetBoardIndex() + 8 * sign;
+    BoardIndex destBoardIndex = piece.GetBoardIndex() + 8 * sign;
 
     if (destBoardIndex < 0 || destBoardIndex > 63) {
         return;
@@ -160,7 +119,7 @@ void ChessLogic::GenerateMovesPawn(Piece &piece, Board &board, std::vector<Chess
     }
 }
 
-void ChessLogic::GenerateMoveRook(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+void ChessLogic::GenerateMoveRook(const Piece &piece, const Board &board, std::vector<ChessLogic::Move> &out_moves) {
 
     // rook move logic
     signed char rank = piece.GetRank();
@@ -173,7 +132,7 @@ void ChessLogic::GenerateMoveRook(Piece &piece, Board &board, std::vector<ChessL
 
     signed char mvr[4] = {8, -8, 1, -1};
     for (signed char m :mvr) {
-        signed char destBoardIndex = piece.GetBoardIndex() + m;
+        BoardIndex destBoardIndex = piece.GetBoardIndex() + m;
         while (true) {
             if (destBoardIndex < 0 || destBoardIndex > 63) {
                 break;
@@ -208,7 +167,7 @@ void ChessLogic::GenerateMoveRook(Piece &piece, Board &board, std::vector<ChessL
 
 }
 
-void ChessLogic::GenerateMoveBishop(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+void ChessLogic::GenerateMoveBishop(const Piece &piece, const Board &board, std::vector<ChessLogic::Move> &out_moves) {
     // rook move logic
 
     signed char rank = piece.GetRank();
@@ -261,7 +220,7 @@ void ChessLogic::GenerateMoveBishop(Piece &piece, Board &board, std::vector<Ches
 
 }
 
-void ChessLogic::GenerateMoveKnight(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+void ChessLogic::GenerateMoveKnight(const Piece &piece, const Board &board, std::vector<ChessLogic::Move> &out_moves) {
 
     signed char rank = piece.GetRank();
     signed char rank_range_index_max = rank * 8 - 1;
@@ -283,7 +242,7 @@ void ChessLogic::GenerateMoveKnight(Piece &piece, Board &board, std::vector<Ches
 
         Piece destPiece = board.GetPieceAtIndex(destBoardIndex);
 
-        char destFile = 'A' + destBoardIndex % 8;
+        char destFile = static_cast<char>('A' + destBoardIndex % 8);
         if (m == 6 || m == 15 || m == -10 || m == -17) {
             if (destFile > file) {
                 continue;
@@ -311,11 +270,11 @@ void ChessLogic::GenerateMoveKnight(Piece &piece, Board &board, std::vector<Ches
 
 }
 
-void ChessLogic::GenerateMoveKing(Piece &piece, Board &board, std::vector<ChessLogic::Move> &out_moves) {
+void ChessLogic::GenerateMoveKing(const Piece &piece, const Board &board, std::vector<ChessLogic::Move> &out_moves) {
 
     signed char rank = piece.GetRank();
-    signed char rank_range_index_max = rank * 8 - 1;
-    signed char rank_range_index_min = (rank - 1) * 8;
+    signed char rank_range_index_max = static_cast<signed char>( rank * 8 - 1 );
+    signed char rank_range_index_min = static_cast<signed char> ((rank - 1) * 8);
     char file = piece.GetFile();
 
     Move move;
@@ -330,7 +289,7 @@ void ChessLogic::GenerateMoveKing(Piece &piece, Board &board, std::vector<ChessL
             continue;
         }
 
-        char destFile = 'A' + destBoardIndex % 8;
+        char destFile = static_cast<char>('A' + destBoardIndex % 8);
         if (m == -1 || m == -9 || m == 7) {
             if (destFile > file) {
                 continue;
@@ -391,20 +350,3 @@ void ChessLogic::GenerateMoveKing(Piece &piece, Board &board, std::vector<ChessL
     }
 
 }
-
-int ChessLogic::ScoreBoard(Board &board) {
-    int score = 0;
-    for (Piece &p : board.GetPieces(Piece::White)) {
-        score += p.GetScore();
-        if ((p.GetRank() == 4 || p.GetRank() == 5) && (p.GetFile() > 'B' && p.GetFile() < 'G')) {
-            score += 4;
-        }
-    }
-
-
-    for (Piece &p : board.GetPieces(Piece::Black)) {
-        score += p.GetScore();
-    }
-    return score;
-}
-

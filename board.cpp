@@ -15,8 +15,9 @@ Board::Board() {
 
 void Board::Reset() {
     Clear();
-    //  SetInitialByFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR");
-    SetInitialByFEN("5/r/2/q/7/8/8/4/n/B/2/p/1/k/1/N/3/P/7/3/K/4");
+    SetInitialByFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR");
+    // SetInitialByFEN("5/r/2/q/7/8/8/4/n/B/2/p/1/k/1/N/3/P/7/3/K/4");
+    SetInitialByFEN("8/8/8/4/p/p/2/");
 }
 
 void Board::Clear() {
@@ -60,19 +61,19 @@ void Board::SetInitialByFEN(const char *fen) {
 }
 
 
-Piece Board::GetPieceAt(char rank, char file) {
-    char boardIndex = (rank - 1) * 8 + file - 'A';
+Piece Board::GetPieceAt(char rank, char file) const {
+    BoardIndex boardIndex = (rank - 1) * 8 + file - 'A';
     return GetPieceAtIndex(boardIndex);
 }
 
-Piece Board::GetPieceAtIndex(char boardIndex) {
-    for (Piece &piece : m_White) {
+Piece Board::GetPieceAtIndex(signed char boardIndex) const {
+    for (const Piece &piece : m_White) {
         if (piece.GetBoardIndex() == boardIndex) {
             return piece;
         }
     }
 
-    for (Piece &piece : m_Black) {
+    for (const Piece &piece : m_Black) {
         if (piece.GetBoardIndex() == boardIndex) {
             return piece;
         }
@@ -84,7 +85,7 @@ Piece Board::GetPieceAtIndex(char boardIndex) {
 }
 
 
-void Board::Print() {
+void Board::Print() const {
     char rank = 8;
     for (; rank >= 1; rank--) {
         std::cout << char('0' + rank) << " ";

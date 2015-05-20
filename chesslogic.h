@@ -9,6 +9,7 @@
 
 #include "pieces.h"
 #include "board.h"
+#include "evaluation.h"
 
 class ChessLogic {
 public:
@@ -22,30 +23,27 @@ public:
         char m_To;
         Board m_Board;
         int m_Score;
-
     };
 
-    void GenerateMoves(Piece &piece, Board &board, std::vector<Move> &out_moves);
-    void GenerateMovesPawn(Piece &piece, Board &board, std::vector<Move> &out_moves);
-    void GenerateMoveRook(Piece &piece, Board &board, std::vector<Move> &out_moves);
-    void GenerateMoveBishop(Piece &piece, Board &board, std::vector<Move> &out_moves);
-    void GenerateMoveKnight(Piece &piece, Board &board, std::vector<Move> &out_moves);
-    void GenerateMoveKing(Piece &piece, Board &board, std::vector<Move> &out_moves);
+    void GenerateMoves(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
+
+    void GenerateMovesPawn(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
+
+    void GenerateMoveRook(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
+
+    void GenerateMoveBishop(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
+
+    void GenerateMoveKnight(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
+
+    void GenerateMoveKing(const Piece &piece, const Board &board, std::vector<Move> &out_moves);
 
     void ApplyMove(Move &move, Board &board);
 
-    int ScoreBoard(Board &Board);
 
-    Move GetBestMove(Piece::Colour colour, Board &board);
+    Move GetBestMove(Piece::Colour colour, const Board &board, Evaluation *eval);
 
-    void GenerateMovesForBoard(Piece::Colour colour, Board &board, std::vector<Move> &out_moves);
+    void GenerateMovesForBoard(Piece::Colour colour, const Board &board, std::vector<Move> &out_moves);
 
-    struct MinMaxBest {
-        int m_Score;
-        Move m_Move;
-    };
-
-    MinMaxBest GetMoveWithMiniMax(Piece::Colour, Move move, int depth, bool maxing);
 
 };
 

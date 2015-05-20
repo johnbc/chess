@@ -18,7 +18,7 @@
  */
 
 #include <iostream>
-#include "Chess.h"
+#include "chess.h"
 
 int main() {
     std::cout << "Hello chess!" << std::endl;

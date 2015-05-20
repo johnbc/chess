@@ -13,6 +13,8 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+
+typedef signed char BoardIndex;
 class Board {
 public:
     Board();
@@ -21,13 +23,15 @@ public:
 
     void SetInitialByFEN(const char *fen);
 
-    void Print();
+    void Print() const;
 
-    Piece GetPieceAt(char rank, char file);
+    Piece GetPieceAt(char rank, char file) const;
 
-    Piece GetPieceAtIndex(char boardIndex);
+    Piece GetPieceAtIndex(BoardIndex boardIndex) const;
 
-    std::array<Piece, 16> &GetPieces(Piece::Colour colour) { return colour == Piece::White ? m_White : m_Black; }
+    const std::array<Piece, 16> &GetPieces(Piece::Colour colour) const {
+        return colour == Piece::White ? m_White : m_Black;
+    }
 
     void SetPieceAtIndex(Piece &piece, signed char index);
 
