@@ -13,17 +13,26 @@ MoveLogic::MoveLogic(const Piece::Colour colourToMove, const Board &board, Evalu
 
 }
 
+
+NegaMaxLogic::NegaMaxLogic(const Piece::Colour colourToMove, const Board &board, Evaluation *evaluation,
+                           ChessLogic *chessLogic) :
+        MoveLogic(colourToMove, board, evaluation, chessLogic) {
+
+}
+
 int NegaMaxLogic::NegaMaxRecursive(Piece::Colour colour, int depth, const Board &board) {
 
     if (depth == 0) {
-        return m_Evaluation->Evaluate(board, m_MoveColour);
+        // board.Print();
+        return m_Evaluation->Evaluate(board, /*m_MoveColour*/ colour);
+
     }
 
     int max = -100000;
     std::vector<ChessLogic::Move> moves;
     m_ChessLogic->GenerateMovesForBoard(colour, board, moves);
     for (ChessLogic::Move &m: moves) {
-        int score = -NegaMaxRecursive(colour == Piece::White ? Piece::Black : Piece::White, depth - 1, board);
+        int score = -NegaMaxRecursive(colour == Piece::White ? Piece::Black : Piece::White, depth - 1, m.m_Board);
         if (score > max) {
             max = score;
         }
@@ -38,7 +47,7 @@ ChessLogic::Move NegaMaxLogic::GetAMove(const int searchDepth) {
     std::vector<ChessLogic::Move> moves;
     m_ChessLogic->GenerateMovesForBoard(m_MoveColour, *m_Board, moves);
     for (ChessLogic::Move &m: moves) {
-        int score = -NegaMaxRecursive(m_MoveColour, searchDepth, *m_Board);
+        int score = NegaMaxRecursive(m_MoveColour, searchDepth, m.m_Board);
         if (score > max) {
             max = score;
             returnMove = m;
@@ -47,8 +56,52 @@ ChessLogic::Move NegaMaxLogic::GetAMove(const int searchDepth) {
     return returnMove;
 }
 
-NegaMaxLogic::NegaMaxLogic(const Piece::Colour colourToMove, const Board &board, Evaluation *evaluation,
-                           ChessLogic *chessLogic) :
+
+NegaMaxAlphaBetaLogic::NegaMaxAlphaBetaLogic(const Piece::Colour colourToMove, const Board &board,
+                                             Evaluation *evaluation, ChessLogic *chessLogic) :
         MoveLogic(colourToMove, board, evaluation, chessLogic) {
 
+}
+
+ChessLogic::Move NegaMaxAlphaBetaLogic::GetAMove(const int searchDepth) {
+    int max = -100000;
+    ChessLogic::Move returnMove;
+    std::vector<ChessLogic::Move> moves;
+    m_ChessLogic->GenerateMovesForBoard(m_MoveColour, *m_Board, moves);
+    for (ChessLogic::Move &m: moves) {
+        int score = NegaMaxAlphaBetaLogicRecursive(m_MoveColour, searchDepth, m.m_Board, -1000000, 100000);
+        if (score > max) {
+            max = score;
+            returnMove = m;
+        }
+    }
+
+    return returnMove;
+}
+
+int NegaMaxAlphaBetaLogic::NegaMaxAlphaBetaLogicRecursive(Piece::Colour colour, int depth, const Board &board,
+                                                          int alpha, int beta) {
+    if (depth == 0) {
+        // board.Print();
+        return m_Evaluation->Evaluate(board, /*m_MoveColour*/ colour);
+
+    }
+
+    int max = -100000;
+    std::vector<ChessLogic::Move> moves;
+    m_ChessLogic->GenerateMovesForBoard(colour, board, moves);
+    for (ChessLogic::Move &m: moves) {
+        int score = -NegaMaxAlphaBetaLogicRecursive(colour == Piece::White ? Piece::Black : Piece::White, depth - 1,
+                                                    m.m_Board, -beta, -alpha);
+        if (score > max) {
+            max = score;
+        }
+        if (alpha > score) {
+            alpha = score;
+        }
+        if (alpha >= beta) {
+            break;
+        }
+    }
+    return max;
 }

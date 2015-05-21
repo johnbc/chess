@@ -13,9 +13,9 @@ ChessLogic::ChessLogic() {
 
 ChessLogic::Move ChessLogic::GetBestMove(Piece::Colour colour, const Board &board, Evaluation *eval) {
 
-    NegaMaxLogic moveLogic(colour, board, eval, this);
+    NegaMaxAlphaBetaLogic moveLogic(colour, board, eval, this);
 
-    return moveLogic.GetAMove(2);
+    return moveLogic.GetAMove(6);
 }
 
 void ChessLogic::GenerateMovesForBoard(Piece::Colour colour, const Board &board,
@@ -92,7 +92,8 @@ void ChessLogic::GenerateMovesPawn(const Piece &piece, const Board &board, std::
         move.m_To = destBoardIndex;
 
         out_moves.push_back(move);
-        if (piece.GetRank() == 2) {
+        if (piece.GetRank() == 2 && piece.GetColour() == Piece::White ||
+            piece.GetRank() == 7 && piece.GetColour() == Piece::Black) {
             destBoardIndex += 8 * sign;
             destPiece = board.GetPieceAtIndex(destBoardIndex);
             if (destPiece.GetType() == Piece::None) {

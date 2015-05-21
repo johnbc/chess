@@ -86,17 +86,28 @@ Piece Board::GetPieceAtIndex(signed char boardIndex) const {
 
 
 void Board::Print() const {
+    bool colour_toggle = false;
     char rank = 8;
     for (; rank >= 1; rank--) {
         std::cout << char('0' + rank) << " ";
         char file = 'A';
         for (; file <= 'H'; file++) {
             Piece p = GetPieceAt(rank, file);
-            std::cout << p.GetText();
+            if (p.GetType() == Piece::None) {
+                std::cout << (colour_toggle ? '.' : ' ');
+
+            }
+            else {
+                std::cout << p.GetText();
+            }
+            colour_toggle = !colour_toggle;
+            std::cout << ' ';
         }
         std::cout << std::endl;
+        colour_toggle = !colour_toggle;
+
     }
-    std::cout << "  ABCDEFGH" << std::endl;
+    std::cout << "  A B C D E F G H " << std::endl;
 }
 
 void Board::SetPieceAtIndex(Piece &piece, signed char index) {

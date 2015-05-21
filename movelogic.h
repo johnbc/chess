@@ -37,4 +37,15 @@ private:
 };
 
 
+class NegaMaxAlphaBetaLogic : public MoveLogic {
+public:
+    NegaMaxAlphaBetaLogic(const Piece::Colour colourToMove, const Board &board, Evaluation *evaluation,
+                          ChessLogic *chessLogic);
+
+    virtual ChessLogic::Move GetAMove(const int searchDepth) override;
+
+private:
+    int NegaMaxAlphaBetaLogicRecursive(Piece::Colour colour, int depth, const Board &board, int alpha, int beta);
+};
+
 #endif //CHESS_MOVELOGIC_H

@@ -75,33 +75,56 @@ void Piece::Set(char index, char p) {
 }
 
 
-char Piece::GetText() {
-    char p = ' ';
+std::string Piece::GetText() {
+    std::string p = ".";
+    if (m_Colour == White) {
+        switch (m_Type) {
+            case Pawn:
+                p = "♙";
+                break;
+            case King:
+                p = "♔";
+                break;
+            case Queen:
+                p = "♕";
+                break;
+            case Rook:
+                p = "♖";
+                break;
+            case Knight:
+                p = "♘";
+                break;
+            case Bishop:
+                p = "♗";
+                break;
+            default:
+                break;
+        }
+    }
+    else {
     switch (m_Type) {
         case Pawn:
-            p = 'p';
+            p = "♟";
             break;
         case King:
-            p = 'k';
+            p = "♚";
             break;
         case Queen:
-            p = 'q';
+            p = "♛";
             break;
         case Rook:
-            p = 'r';
+            p = "♜";
             break;
         case Knight:
-            p = 'n';
+            p = "♞";
             break;
         case Bishop:
-            p = 'b';
+            p = "♝";
             break;
         default:
             break;
-    }
 
-    if (m_Colour == Black) {
-        p -= 32;
+    }
     }
 
     return p;

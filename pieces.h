@@ -49,7 +49,7 @@ public:
 
     Type GetType() const { return m_Type; }
 
-    char GetText();
+    std::string GetText();
 
 private:
     signed char m_BoardIndex;
